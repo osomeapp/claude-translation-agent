@@ -1,0 +1,61 @@
+name: Auto-close Issues
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [closed]
+
+jobs:
+  auto-close-issues:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Auto-close related issues
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const { data: pr } = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.payload.pull_request.number
+          });
+          
+          // Look for issue references in PR body and title
+          const issueRegex = /#(\d+)/g;
+          const prText = `${pr.title} ${pr.body}`;
+          const matches = [...prText.matchAll(issueRegex)];
+          
+          for (const match of matches) {
+            const issueNumber = parseInt(match[1]);
+            
+            try {
+              // Check if issue exists and is open
+              const { data: issue } = await github.rest.issues.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber
+              });
+              
+              if (issue.state === 'open') {
+                // Close the issue
+                await github.rest.issues.update({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  state: 'closed'
+                });
+                
+                // Add a comment
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: issueNumber,
+                  body: `🎉 This issue has been automatically closed by PR #${context.payload.pull_request.number}`
+                });
+              }
+            } catch (error) {
+              console.log(`Could not process issue #${issueNumber}: ${error.message}`);
+            }
+          }
