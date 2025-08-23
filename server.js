@@ -21,7 +21,8 @@ app.post('/api/translate', async (req, res) => {
         // Language mapping
         const languageMap = {
             'zh': 'Chinese (Simplified)',
-            'fil': 'Filipino (Tagalog)'
+            'fil': 'Filipino (Tagalog)',
+            'en': 'English'
         };
 
         const targetLangName = languageMap[targetLanguage] || 'Chinese (Simplified)';

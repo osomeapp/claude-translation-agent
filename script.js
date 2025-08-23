@@ -56,6 +56,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 !voice.lang.startsWith('fil') && !voice.lang.startsWith('tl') && 
                 !voice.lang.includes('Filipino') && !voice.lang.includes('Tagalog')
             );
+        } else if (currentTargetLang === 'en') {
+            // Filter for English voices
+            targetVoices = voices.filter(voice => 
+                voice.lang.startsWith('en') || 
+                voice.lang.includes('English') ||
+                voice.name.includes('English')
+            );
+            fallbackVoices = voices.filter(voice => 
+                !voice.lang.startsWith('en') && !voice.lang.includes('English')
+            );
         }
         
         // Add target language voices first
@@ -108,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 autoVoice = voices.find(voice => 
                     voice.lang.startsWith('fil') || voice.lang.startsWith('tl') ||
                     voice.lang.includes('Filipino') || voice.lang.includes('Tagalog')
+                );
+            } else if (currentTargetLang === 'en') {
+                autoVoice = voices.find(voice => 
+                    voice.lang.startsWith('en') || voice.lang.includes('English')
                 );
             }
             if (autoVoice) {
